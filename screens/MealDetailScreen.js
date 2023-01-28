@@ -1,28 +1,49 @@
-import { Text, View, Image, StyleSheet, ScrollView, Button } from 'react-native';
+import {
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  ScrollView,
+  Button,
+} from 'react-native';
 import List from '../components/MealDetail/List';
 import Subtitle from '../components/MealDetail/Subtitle';
 import MealDetails from '../components/MealDetails';
 import { MEALS } from '../data/dummy-data';
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useContext } from 'react';
 import IconButton from '../components/IconButton';
+import { FavoritesContext } from '../store/context/favorites-context';
 
 function MealDetailScreen({ route, navigation }) {
+  const favoriteMealsCtx = useContext(FavoritesContext);
   const mealId = route.params.mealId;
 
   const selectedMeals = MEALS.find((meal) => meal.id === mealId);
-  
-  function headerButtonPressHandler(){
-    console.log('Preaaed!');
+
+  const mealIsFavorite = favoriteMealsCtx.ids.includes(mealId);
+
+  function changeFavoriteStatusHandler() {
+    if (mealIsFavorite) {
+      favoriteMealsCtx.removeFavorite(mealId);
+    } else {
+      favoriteMealsCtx.addFavorite(mealId);
+    }
   }
-  
-  useLayoutEffect(()=>{
+
+  useLayoutEffect(() => {
     navigation.setOptions({
-        headerRight: () =>{
-            return <IconButton icon="star" color="white" onPress={headerButtonPressHandler}/>
-        }
+      headerRight: () => {
+        return (
+          <IconButton
+            icon={mealIsFavorite ? 'star' : 'star-outline'}
+            color="white"
+            onPress={changeFavoriteStatusHandler}
+          />
+        );
+      },
     });
-  }, [navigation,headerButtonPressHandler]);
-  
+  }, [navigation, changeFavoriteStatusHandler]);
+
   return (
     <ScrollView style={styles.rootContainer}>
       <View style={styles.listOuterContainer}>
@@ -50,9 +71,9 @@ function MealDetailScreen({ route, navigation }) {
 export default MealDetailScreen;
 
 const styles = StyleSheet.create({
-    rootContainer:{
-        marginBottom:32,
-    },
+  rootContainer: {
+    marginBottom: 32,
+  },
   images: {
     width: '100%',
     height: 350,
